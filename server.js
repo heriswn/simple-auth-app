@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const passport = require("passport");
 const flash = require("connect-flash");
 const path = require("path");
+const MongoStore = require("connect-mongo");
 
 // Initialize Express
 const app = express();
@@ -34,10 +35,16 @@ app.use(express.urlencoded({ extended: false }));
 // Express session
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || "your-session-secret",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false },
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      collectionName: "sessions",
+    }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 hari
+    },
   })
 );
 
